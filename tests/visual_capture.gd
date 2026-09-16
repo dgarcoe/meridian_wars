@@ -50,3 +50,7 @@ func _capture(name: String) -> void:
 	if image.save_png("res://build/screenshots/" + name + ".png") != OK:
 		push_error("Cannot write screenshot")
 		quit(1)
+	if OS.get_cmdline_user_args().has("--log-preview"):
+		# Optional CI preview transport; only generated game pixels, no user files.
+		image.resize(1280,800)
+		print("VISUAL_PREVIEW:" + name + ":" + Marshalls.raw_to_base64(image.save_jpg_to_buffer(.8)))

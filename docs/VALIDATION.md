@@ -19,7 +19,9 @@ falló por permisos; no se han sorteado esas restricciones.
 
 `.github/workflows/godot-tests.yml` ejecuta las reglas y el layout, después
 `scene_smoke.gd` y `visual_capture.gd` con Xvfb/OpenGL por software en el runner.
-Los pasos gráficos fallan ante mensajes `ERROR:` o `SCRIPT ERROR`.
+Los pasos gráficos fallan ante mensajes `ERROR:` o `SCRIPT ERROR`. El driver
+de audio Dummy evita depender de una tarjeta de sonido en CI; el renderizado
+sí usa OpenGL real por software.
 Las capturas se publican como artefacto `meridian-engine-screenshots`.
 Consultar el resultado de Actions del commit; configurar un workflow no implica
 que ya se haya ejecutado con éxito.
