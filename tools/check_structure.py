@@ -12,6 +12,8 @@ def main() -> int:
     for path in files:
         source = path.read_text(encoding="utf-8")
         for reference in re.findall(r'"res://([^"\n]+)"', source):
+            if reference.startswith("build/"):
+                continue  # Generated screenshots/exports are outputs, not source dependencies.
             references += 1
             if not (root / reference).is_file():
                 errors.append(f"{path.relative_to(root)}: missing {reference}")

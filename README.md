@@ -1,70 +1,96 @@
-# Las Guerras del Meridiano
+# Meridian Wars — Operación Nártex
 
-Prototipo 0.1 de estrategia espacial original en Godot 4 / GDScript.
-Repositorio Git independiente. No contiene material de LOGH ni depende de Python.
+Primera misión integrada de estrategia espacial original en **Godot 4.3**.
+Interfaz de mando naval, decisiones previas, despliegue y combate 3D con pausa.
+No es todavía una gran campaña: esta entrega valida un recorrido completo de misión.
 
-## Ejecutar
+## Empezar
 
-1. Instalar Godot 4.3 o posterior (edición estándar, no necesita .NET).
-2. Importar `project.godot` desde el gestor de proyectos.
-3. Pulsar F6 en `presentation/main.tscn` o F5 para iniciar el proyecto.
+1. Clona el repositorio e importa `project.godot` en Godot 4.3 estándar.
+2. Pulsa F5. Elige comandante y doctrina; autoriza la operación.
+3. Refuerza las escuadras y salta de Veyra a Sereva y después a Nártex.
+4. Pulsa **Asumir mando táctico**. La batalla comienza en pausa.
+5. Da órdenes, inicia el combate y vuelve al centro de mando al finalizar.
 
-Selecciona una flota de Veyra en el desplegable y pulsa un sistema adyacente.
-Las líneas doradas son órdenes pendientes, reemplazables hasta resolver turno.
-Puedes reforzar flotas por 10 créditos o cancelar todas las órdenes.
-La Liga emite sus órdenes antes de resolver los movimientos simultáneos.
-Ganas al eliminar sus flotas; perder ambas fuerzas produce un empate.
-Nueva campaña reinicia inmediatamente el prototipo.
+Diseño lógico de 1600×1000, escalado a la ventana (1440×900 por defecto).
+No requiere .NET, Python, plugins ni paquetes artísticos externos para jugar.
 
-## Pruebas
+## Qué incluye
+
+- Centro de mando azul profundo, dorado/cian, paneles de escuadras y registro.
+- Mapa vectorial de 12 sistemas: inspección, zoom y desplazamiento.
+- Una ruta operativa de dos saltos; el resto de sistemas es contexto cartográfico.
+- Dos comandantes: alcance +15% o velocidad +20%.
+- Fragatas, cruceros y porta-lanzas con alcance, casco, velocidad y daño diferentes.
+- Refuerzos con coste y capacidad máxima; suministros consumidos por salto.
+- Batalla con 30 naves iniciales, modelos procedurales 3D, formaciones,
+  etiquetas de escuadra, selección, rayos de armas y destellos de destrucción.
+- Simulación determinista a 10 Hz, daño simultáneo, alcance y orientación.
+- Protección del convoy: sobrevivir 120 s o eliminar al enemigo.
+- Interdicción: eliminar al enemigo; retirada por límite de 300 s.
+- Retirada voluntaria con confirmación; resultados y bajas persistentes.
+- Tesoro y apoyo civil afectados por el desenlace y las bajas.
+- Guardado/carga de un slot, versión de esquema y validación antes de aplicar.
+  No guarda batallas en curso. Reiniciar requiere confirmación.
+
+## Controles
+
+| Contexto | Control |
+| --- | --- |
+| Mapa | Clic en sistema: inspeccionar; rueda: zoom; arrastre central: desplazar |
+| Batalla | Clic o 1/2/3: seleccionar escuadra propia |
+| Órdenes | Clic derecho en espacio: mover; en escuadra enemiga: atacar |
+| Tiempo | Espacio o botón: pausa; botones ×1/×2/×4: velocidad |
+| Mantener posición | H o botón; sigue disparando si hay objetivos a alcance |
+| Cámara | Botón central: órbita; rueda: zoom; WASD: desplazar; F: centrar |
+| Fuego conjunto | Botón: las tres escuadras atacan el primer grupo enemigo vivo |
+
+## Clean code y separación de responsabilidades
+
+- `domain/operation.gd`: estados de misión, costes y consecuencias; sin escenas/disco.
+- `domain/tactical_battle.gd`: simulación táctica y órdenes; sin renderizado.
+- `infrastructure/operation_store.gd`: serialización y reemplazo mediante fichero temporal.
+- `presentation/deck_theme.gd`: colores, tipografía, superficies y componentes reutilizables.
+- `presentation/sector_map.gd`: cartografía e interacción de cámara.
+- `presentation/ship_visual.gd`: modelos originales construidos con mallas.
+- `presentation/battle_view.gd`: adaptación de la simulación al escenario 3D y controles.
+- `presentation/main.gd`: composición de pantallas y conexión de la misión.
+- `tests/`: pruebas de reglas, persistencia, ciclo de escenas y límites del layout.
+
+El prototipo estratégico 0.1 se conserva en sus módulos originales y sus pruebas,
+pero ya no es la pantalla principal. No hay autoloads ni dependencias externas.
+El dominio usa RefCounted y GDScript; las entidades tácticas son diccionarios internos.
+
+## Verificación
 
 ```sh
+godot --headless --editor --path . --quit
 godot --headless --path . --script tests/run_tests.gd
-godot --headless --path . --quit-after 10
+godot --headless --path . --script tests/operation_tests.gd
+godot --headless --path . --script tests/layout_smoke.gd
+godot --path . --script tests/scene_smoke.gd
+godot --path . --script tests/visual_capture.gd
 ```
 
-El ejecutable puede llamarse `godot4` en algunas instalaciones.
-El runner devuelve código 1 si falla cualquier comprobación. No requiere plugins.
-Incluye órdenes inválidas, sustitución de órdenes, economía, combate simultáneo,
-eliminación, empate, bloqueo al finalizar y simulación de 20 turnos.
+Los dos últimos comandos deben usar un renderizador real. En Linux CI se ejecutan
+con Xvfb y OpenGL por software. `visual_capture.gd` genera cuatro PNG reales del
+motor en `build/screenshots/`. GitHub Actions los adjunta como artefacto.
+El éxito de generar capturas no sustituye una revisión visual humana.
 
-## Arquitectura y clean code
+## Límites de esta entrega
 
-| Capa | Responsabilidad |
-| --- | --- |
-| `domain/` | Estado de campaña, resolución de combate y planificación de IA |
-| `application/` | Casos de uso y validación de acciones |
-| `infrastructure/` | Construcción del escenario inicial |
-| `presentation/` | Mapa, entradas y composición de dependencias |
-| `tests/` | Pruebas sin interfaz y sin dependencias externas |
+- Una misión cerrada, no campaña libre ni diplomacia/parlamento completos.
+- El convoy es un objetivo temporizado, no una nave civil simulada y atacable.
+- La simulación agrupa el casco y daño por escuadra; las naves son representación
+  del número superviviente, sin colisiones ni rutas individuales.
+- Maniobras sobre plano XZ dentro de un escenario 3D, no navegación libre en seis ejes.
+- IA táctica de aproximación al enemigo más cercano; sin planificación avanzada.
+- Efectos básicos y modelos originales de prototipo; sin música, audio ni retratos.
+- Balance preliminar; sin multijugador ni ejecutables exportados.
 
-La simulación usa objetos RefCounted, no escenas ni autoloads; el servicio recibe
-sus dependencias por constructor. La interfaz no decide reglas de combate.
-Constantes nombradas, métodos con una responsabilidad, sin servicios globales.
-Las colecciones de entidades son diccionarios internos en este primer corte;
-convertirlas a modelos tipados antes de añadir persistencia y escenarios externos.
-No se introduce una interfaz/abstracción sin una necesidad concreta.
+Próximo hito: revisar las capturas y probar controles en un PC, mejorar el arte
+de naves/efectos y el balance, después ampliar logística y campaña persistente.
 
-Referencia técnica: [RefCounted en Godot](https://docs.godotengine.org/en/stable/classes/class_refcounted.html).
-
-## Alcance y límites explícitos
-
-- 12 sistemas, dos facciones activas, mundos neutrales y cuatro flotas.
-- Grafo 2D, turnos, ingresos, refuerzos, captura y combate automático determinista.
-- Reabastecimiento local inmediato tras captura: todavía no hay líneas logísticas.
-- Las flotas que cruzan una ruta en sentidos opuestos no se interceptan.
-- IA de expansión por distancia, sin refuerzos, evaluación militar ni niebla de guerra.
-- Combate agregado 1:1, sin clases de nave, comandantes ni tácticas aún.
-- Sin guardado/carga, política, narrativa ramificada, sonido, multijugador ni exportaciones.
-- No hay dependencias de terceros ni assets descargados. Nombres provisionales.
-
-## Próximos hitos
-
-1. Ejecutar y revisar visualmente en Godot; equilibrar bucle de 10 turnos.
-2. Modelos tipados y guardado versionado con validación y escritura atómica.
-3. Logística conectada, refuerzos de IA y pruebas de victoria/derrota.
-4. Comandantes, apoyo político y una decisión con consecuencias por turno.
-5. Batalla táctica 2D compartiendo el mismo contrato de resultados.
-
-No se ha elegido licencia de distribución del código ni publicado el juego.
-Mantener activos, personajes, música y guiones propios y registrar su procedencia.
+No contiene nombres, guiones, imágenes ni música de LOGH. No se ha elegido una
+licencia de distribución del código; no confundir la licencia MIT de Godot con
+la del juego.

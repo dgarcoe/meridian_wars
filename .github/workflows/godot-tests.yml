@@ -1,0 +1,44 @@
+name: Godot verification
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.3
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/godot.zip" https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+      - name: Import and test domain
+        run: |
+          set -o pipefail
+          python3 tools/check_structure.py
+          Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit 2>&1 | tee /tmp/import.log
+          ! grep -E 'SCRIPT ERROR|ERROR:' /tmp/import.log
+          Godot_v4.3-stable_linux.x86_64 --headless --path . --script tests/run_tests.gd
+          Godot_v4.3-stable_linux.x86_64 --headless --path . --script tests/operation_tests.gd
+          Godot_v4.3-stable_linux.x86_64 --headless --path . --script tests/layout_smoke.gd
+      - name: Real renderer smoke and screenshots
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          set -o pipefail
+          xvfb-run -a Godot_v4.3-stable_linux.x86_64 --path . --script tests/scene_smoke.gd 2>&1 | tee /tmp/scene.log
+          ! grep -E 'SCRIPT ERROR|ERROR:' /tmp/scene.log
+          xvfb-run -a Godot_v4.3-stable_linux.x86_64 --path . --script tests/visual_capture.gd 2>&1 | tee /tmp/visual.log
+          ! grep -E 'SCRIPT ERROR|ERROR:' /tmp/visual.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meridian-engine-screenshots
+          path: build/screenshots/*.png
+          if-no-files-found: warn
