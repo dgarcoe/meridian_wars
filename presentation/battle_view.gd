@@ -21,7 +21,7 @@ var _selected: int = 0
 var _paused: bool = true
 var _speed: float = 1.0
 var _yaw: float = 0.0
-var _distance: float = 145.0
+var _distance: float = 115.0
 var _focus := Vector3.ZERO
 var _status: Label
 var _selection: Label
@@ -132,8 +132,8 @@ func _build_world() -> void:
 			squad.add_child(ship)
 		var label := Label3D.new()
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		label.font_size = 40
-		label.pixel_size = .07
+		label.font_size = 36
+		label.pixel_size = .055
 		label.modulate = UI.GOLD if unit.side == 0 else UI.CYAN
 		_world.add_child(label)
 		_labels.append(label)
@@ -177,11 +177,14 @@ func _stars_and_planet() -> void:
 	_world.add_child(stars)
 	var planet := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
-	sphere.radius = 65
-	sphere.height = 130
+	sphere.radius = 48
+	sphere.height = 96
 	planet.mesh = sphere
-	planet.material_override = Ship.material(Color("213f58"))
-	planet.position = Vector3(140,-95,-260)
+	var surface := Ship.material(Color("243f53"))
+	surface.metallic = 0
+	surface.roughness = 1
+	planet.material_override = surface
+	planet.position = Vector3(160,-80,-360)
 	_world.add_child(planet)
 
 
@@ -211,8 +214,8 @@ func _sync_visuals() -> void:
 		for i in range(squad.get_child_count()):
 			squad.get_child(i).visible = i < count
 		var label := _labels[unit.id]
-		label.position = squad.position + Vector3(0,5,0)
-		var squad_name: String = NAMES[unit.class] if unit.side == 0 else "LIGA %d" % (unit["class"] + 1)
+		label.position = squad.position + Vector3(0,7 if unit.side == 0 else 14,0)
+		var squad_name: String = ("V" if unit.side == 0 else "L") + str(int(unit["class"]) + 1)
 		label.text = "%s · %02d" % [squad_name, count]
 		label.visible = count > 0
 		_rings[unit.id].position = squad.position + Vector3(0,-2.5,0)

@@ -22,6 +22,29 @@ func _run() -> void:
 	main._launch()
 	await process_frame
 	var battle = main._screen.get_child(0)
+	# Exercise actual camera projection → mouse adapter → simulation order.
+	var click := InputEventMouseButton.new()
+	click.pressed = true
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.position = battle._camera.unproject_position(Vector3(-44,0,0))
+	battle._battle_input(click)
+	if battle._selected != 1:
+		push_error("Mouse failed to select second squad")
+		quit(1)
+		return
+	click.button_index = MOUSE_BUTTON_RIGHT
+	click.position = battle._camera.unproject_position(Vector3(-20,0,0))
+	battle._battle_input(click)
+	if battle.simulation.units[1].goal.distance_to(Vector2(-20,0)) > .1:
+		push_error("Mouse failed to issue movement order")
+		quit(1)
+		return
+	click.position = battle._camera.unproject_position(Vector3(44,0,0))
+	battle._battle_input(click)
+	if battle.simulation.units[1].target != 4:
+		push_error("Mouse failed to issue attack order")
+		quit(1)
+		return
 	battle._focus_fire()
 	battle._toggle_pause()
 	for frame in range(30):

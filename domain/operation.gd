@@ -71,7 +71,8 @@ func resolve(outcome: String, survivors: Array[int]) -> bool:
 		support = clampi(support + (12 if doctrine == "protect" else 5) - losses, 0, 100)
 	else:
 		support = maxi(0, support - (12 if outcome == "retreat" else 22))
-	log.append("Operación cerrada · %s · %d bajas navales." % [outcome, losses])
+	var description: String = {"victory":"victoria", "defeat":"derrota", "retreat":"retirada"}[outcome]
+	log.append("Operación cerrada · %s · %d bajas navales." % [description, losses])
 	return true
 
 

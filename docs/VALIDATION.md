@@ -26,10 +26,20 @@ Las capturas se publican como artefacto `meridian-engine-screenshots`.
 Consultar el resultado de Actions del commit; configurar un workflow no implica
 que ya se haya ejecutado con éxito.
 
+## Resultado gráfico
+
+El run 35131352458 completó reglas, layout, ciclo de escenas y cuatro capturas
+con OpenGL/Mesa en GitHub Actions. Se revisaron las capturas de briefing,
+contacto, batalla e informe: paneles completos y texto legible. Esa revisión
+detectó etiquetas tácticas solapadas y una cámara demasiado alejada; se acortan
+los identificadores, se separa su altura por bando y se aproxima la cámara.
+La prueba de escenas añade selección, movimiento y ataque mediante proyección
+de clics sobre el escenario. Consultar el último run para estas correcciones.
+
 ## Revisión manual pendiente
 
-- Composición visual de las cuatro capturas reales y legibilidad con escalado.
-- Raycasting de selección y órdenes con ratón en distintos tamaños de ventana.
+- Legibilidad en pantallas físicas y escalados distintos del layout de referencia.
+- Selección y órdenes con ratón en distintos tamaños de ventana.
 - Cámara orbital, navegación WASD y teclado con foco en botones.
 - Pruebas prolongadas para balance, rendimiento y diferencias entre plataformas.
 
